@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagram Editor Demo</title>
+    <style src="css/style.css"></style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+    <script src="js/diagram_editor.js"></script>
+    <script>
+        require(['declarations'], function(declarations) {
+            console.log(new declarations.Action('addition', ([x, y]) => x + y, [{ name: 'first', type: declarations.numberArg}, {name: 'second', type: declarations.numberArg}]).exec(['3', '4']).toString());
+        });
+    </script>
+</body>
+</html>
