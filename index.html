@@ -9,8 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
     <script src="js/diagramEditor.js"></script>
     <script>
-        require(['declarations'], function(declarations) {
-            console.log(new declarations.Action('addition', ([x, y]) => x + y, [{ name: 'first', type: declarations.numberArg}, {name: 'second', type: declarations.numberArg}]).exec(['3', '4']).toString());
+        require(['diagramEditor'], function(diagramEditor) {
+            console.log(diagramEditor.addition.exec([3, 4]));
         });
     </script>
 </body>

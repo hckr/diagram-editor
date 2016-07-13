@@ -1,4 +1,9 @@
-define("declarations", ["require", "exports"], function (require, exports) {
+define("argumentTypes", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.string = { name: "string", fromString: function (str) { return str; } };
+    exports.number = { name: "number", fromString: function (str) { return Number(str); } };
+});
+define("action", ["require", "exports"], function (require, exports) {
     "use strict";
     var Action = (function () {
         function Action(name, func, argDeclarations) {
@@ -12,11 +17,14 @@ define("declarations", ["require", "exports"], function (require, exports) {
         };
         return Action;
     }());
-    exports.Action = Action;
-    exports.stringArg = { name: "string", fromString: function (str) { return str; } };
-    exports.numberArg = { name: "number", fromString: function (str) { return Number(str); } };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.default = Action;
 });
-define("diagramEditor", ["require", "exports"], function (require, exports) {
+define("diagramEditor", ["require", "exports", "action", "argumentTypes"], function (require, exports, action_1, argumentTypes_1) {
     "use strict";
+    exports.addition = new action_1.default('addition', function (_a) {
+        var x = _a[0], y = _a[1];
+        return x + y;
+    }, [{ name: 'first', type: argumentTypes_1.number }, { name: 'second', type: argumentTypes_1.number }]);
 });
 //# sourceMappingURL=diagramEditor.js.map
