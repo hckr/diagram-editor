@@ -16,7 +16,7 @@ define("declarations", ["require", "exports"], function (require, exports) {
     exports.stringArg = { name: "string", fromString: function (str) { return str; } };
     exports.numberArg = { name: "number", fromString: function (str) { return Number(str); } };
 });
-define("diagram_editor", ["require", "exports"], function (require, exports) {
+define("diagramEditor", ["require", "exports"], function (require, exports) {
     "use strict";
 });
-//# sourceMappingURL=diagram_editor.js.map
+//# sourceMappingURL=diagramEditor.js.map
