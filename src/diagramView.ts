@@ -5,7 +5,7 @@ export interface BoundingSquare {
     height: number;
 }
 
-export interface DiagramObject {
+export interface DiagramBlock {
     id?: string; // optional; replaced during addition if object with provided id already exists on diagram
     resizable: Boolean;
     movable: Boolean;
@@ -17,10 +17,10 @@ export class DiagramView {
     canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
 
-    drawableObjects: DiagramObject[];
-    selectedObjects: DiagramObject[];
-    moving: Boolean = false;
-    resizing: Boolean = false;
+    blocks: DiagramBlock[] = [];
+    selectedBlocks: DiagramBlock[] = [];
+    moving = false;
+    resizing = false;
 
     constructor(width: number, height: number) {
         let canvas = document.createElement('canvas');
@@ -34,30 +34,70 @@ export class DiagramView {
         this.drawingLoop();
     }
 
-    addObject(object: DiagramObject): void {
-        this.drawableObjects.push(object);
+    addBlock(block: DiagramBlock): void {
+        this.blocks.push(block);
     }
 
     private registerEvents(): void {
-        this.canvas.addEventListener('mousedown', this.onMouseDown, false);
-        this.canvas.addEventListener('mousemove', this.onMouseMove, false);
-        this.canvas.addEventListener('mouseup', this.onMouseUp, false);
+        this.canvas.addEventListener('mousedown', e => { this.onMouseDown(e) }, false);
+        this.canvas.addEventListener('mousemove', e => { this.onMouseMove(e) }, false);
+        this.canvas.addEventListener('mouseup', e => { this.onMouseUp(e) }, false);
+    }
+
+    private getBlockUnderCursor(event: MouseEvent): DiagramBlock {
+        let mouseX = event.pageX - this.canvas.offsetLeft;
+        let mouseY = event.pageY - this.canvas.offsetTop;
+
+        for(let block of this.blocks) {
+            let boundingSquare = block.getBoundingSquare(0);
+            let bounds = {
+                top: boundingSquare.top,
+                right: boundingSquare.left + boundingSquare.width,
+                bottom: boundingSquare.top + boundingSquare.height,
+                left: boundingSquare.left
+            }
+            if(mouseY > bounds.top && mouseY < bounds.bottom &&
+               mouseX > bounds.left && mouseX < bounds.right)
+            {
+                return block;
+            }
+        }
+
+        return null;
     }
 
     private onMouseDown(event: MouseEvent) {
-
+        let block = this.getBlockUnderCursor(event);
+        if(!event.ctrlKey && block) {
+            this.selectedBlocks = [block];
+        } else if(event.ctrlKey) {
+            if(this.selectedBlocks.indexOf(block) > -1) {
+                this.selectedBlocks.filter(el => el != block);
+            } else {
+                this.selectedBlocks.push(block);
+            }
+        } else {
+            this.selectedBlocks = [];
+        }
+        console.log(this.selectedBlocks);
     }
 
     private onMouseMove(event: MouseEvent) {
+        if(this.getBlockUnderCursor(event)) {
+            this.canvas.style.cursor = 'move';
+        } else {
+            this.canvas.style.cursor = 'default';
+        }
+
         if(this.moving) {
-            this.selectedObjects.forEach(obj => {
-                
-            })
+            this.selectedBlocks.forEach(obj => {
+
+            });
         }
         if(this.resizing) {
-            this.selectedObjects.forEach(obj => {
-                
-            })
+            this.selectedBlocks.forEach(obj => {
+
+            });
         }
     }
 
@@ -68,9 +108,19 @@ export class DiagramView {
 
     private drawingLoop(): void {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawableObjects.forEach(obj => {
-            obj.drawInContext(this.context);
+        this.blocks.forEach(block => {
+            block.drawInContext(this.context);
         });
-        window.requestAnimationFrame(this.drawingLoop);
+        this.context.save();
+        this.context.setLineDash([1, 1]);
+        this.selectedBlocks.forEach(block => {
+            let boundingSquare = block.getBoundingSquare(5);
+            this.context.strokeRect(boundingSquare.left, boundingSquare.top,
+                                    boundingSquare.width, boundingSquare.height);
+        });
+        this.context.restore();
+        window.requestAnimationFrame(() => {
+            this.drawingLoop();
+        });
     }
 }
