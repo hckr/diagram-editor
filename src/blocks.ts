@@ -1,4 +1,4 @@
-import { DrawableObject } from 'canvasPainter'
+import { DiagramObject } from 'diagramView'
 
 // enum value can be read as string, e.g.: blockType[blockType.Entry]
 export enum BlockType {
@@ -8,6 +8,6 @@ export enum BlockType {
     Exit
 }
 
-export interface Block extends DrawableObject {
+export interface Block extends DiagramObject {
     type: BlockType;
 }

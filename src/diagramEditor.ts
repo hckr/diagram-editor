@@ -1,4 +1,14 @@
-import Action from 'action';
-import { number } from 'argumentTypes'
+import { DiagramView } from 'diagramView'
 
-export let addition = new Action('addition', ([x, y]) => x + y, [{ name: 'first', type: number}, {name: 'second', type: number}]);
+export class DiagramEditor {
+    private canvas: HTMLCanvasElement;
+    private diagramView: DiagramView;
+
+    constructor(width: number, height: number) {
+        this.diagramView = new DiagramView(width, height);
+    }
+
+    appendTo(element: HTMLElement): void {
+        element.appendChild(this.diagramView.canvas);
+    }
+}

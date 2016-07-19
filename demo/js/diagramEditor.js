@@ -1,30 +1,64 @@
-define("argumentTypes", ["require", "exports"], function (require, exports) {
+define("diagramView", ["require", "exports"], function (require, exports) {
     "use strict";
-    exports.string = { name: "string", fromString: function (str) { return str; } };
-    exports.number = { name: "number", fromString: function (str) { return Number(str); } };
-});
-define("action", ["require", "exports"], function (require, exports) {
-    "use strict";
-    var Action = (function () {
-        function Action(name, func, argDeclarations) {
-            this.name = name;
-            this.func = func;
-            this.argDeclarations = argDeclarations;
+    var DiagramView = (function () {
+        function DiagramView(width, height) {
+            this.moving = false;
+            this.resizing = false;
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            this.canvas = canvas;
+            this.context = canvas.getContext("2d");
+            this.registerEvents();
+            this.drawingLoop();
         }
-        Action.prototype.exec = function (args) {
-            var _this = this;
-            return this.func(args.map(function (argument, index) { return _this.argDeclarations[index].type.fromString(argument); }));
+        DiagramView.prototype.addObject = function (object) {
+            this.drawableObjects.push(object);
         };
-        return Action;
+        DiagramView.prototype.registerEvents = function () {
+            this.canvas.addEventListener('mousedown', this.onMouseDown, false);
+            this.canvas.addEventListener('mousemove', this.onMouseMove, false);
+            this.canvas.addEventListener('mouseup', this.onMouseUp, false);
+        };
+        DiagramView.prototype.onMouseDown = function (event) {
+        };
+        DiagramView.prototype.onMouseMove = function (event) {
+            if (this.moving) {
+                this.selectedObjects.forEach(function (obj) {
+                });
+            }
+            if (this.resizing) {
+                this.selectedObjects.forEach(function (obj) {
+                });
+            }
+        };
+        DiagramView.prototype.onMouseUp = function (event) {
+            this.moving = false;
+            this.resizing = false;
+        };
+        DiagramView.prototype.drawingLoop = function () {
+            var _this = this;
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.drawableObjects.forEach(function (obj) {
+                obj.drawInContext(_this.context);
+            });
+            window.requestAnimationFrame(this.drawingLoop);
+        };
+        return DiagramView;
     }());
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = Action;
+    exports.DiagramView = DiagramView;
 });
-define("diagramEditor", ["require", "exports", "action", "argumentTypes"], function (require, exports, action_1, argumentTypes_1) {
+define("diagramEditor", ["require", "exports", "diagramView"], function (require, exports, diagramView_1) {
     "use strict";
-    exports.addition = new action_1.default('addition', function (_a) {
-        var x = _a[0], y = _a[1];
-        return x + y;
-    }, [{ name: 'first', type: argumentTypes_1.number }, { name: 'second', type: argumentTypes_1.number }]);
+    var DiagramEditor = (function () {
+        function DiagramEditor(width, height) {
+            this.diagramView = new diagramView_1.DiagramView(width, height);
+        }
+        DiagramEditor.prototype.appendTo = function (element) {
+            element.appendChild(this.diagramView.canvas);
+        };
+        return DiagramEditor;
+    }());
+    exports.DiagramEditor = DiagramEditor;
 });
 //# sourceMappingURL=diagramEditor.js.map

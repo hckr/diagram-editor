@@ -10,7 +10,7 @@
     <script src="js/diagramEditor.js"></script>
     <script>
         require(['diagramEditor'], function(diagramEditor) {
-            console.log(diagramEditor.addition.exec([3, 4]));
+            new diagramEditor.DiagramEditor(800, 600).appendTo(document.body);
         });
     </script>
 </body>
