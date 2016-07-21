@@ -4,7 +4,7 @@ define("diagramView", ["require", "exports"], function (require, exports) {
         function DiagramView(width, height) {
             this.blocks = [];
             this.selectedBlocks = [];
-            this.moving = false;
+            this.dragging = false;
             this.resizing = false;
             var canvas = document.createElement('canvas');
             canvas.width = width;
@@ -42,23 +42,40 @@ define("diagramView", ["require", "exports"], function (require, exports) {
             }
             return null;
         };
-        DiagramView.prototype.onMouseDown = function (event) {
+        DiagramView.prototype.handleSelection = function (event) {
             var block = this.getBlockUnderCursor(event);
-            if (!event.ctrlKey && block) {
-                this.selectedBlocks = [block];
-            }
-            else if (event.ctrlKey) {
-                if (this.selectedBlocks.indexOf(block) > -1) {
-                    this.selectedBlocks.filter(function (el) { return el != block; });
-                }
-                else {
+            var wasPreviouslySelected = this.selectedBlocks.indexOf(block) != -1;
+            if (block) {
+                if (event.ctrlKey) {
+                    if (wasPreviouslySelected) {
+                        this.selectedBlocks = this.selectedBlocks.filter(function (el) { return el != block; });
+                        return;
+                    }
                     this.selectedBlocks.push(block);
+                    return;
                 }
+                if (!wasPreviouslySelected) {
+                    this.selectedBlocks = [block];
+                }
+                this.onDragStart(event);
+                return;
             }
-            else {
+            if (!event.ctrlKey) {
                 this.selectedBlocks = [];
             }
-            console.log(this.selectedBlocks);
+        };
+        DiagramView.prototype.onDragStart = function (event) {
+            this.dragging = true;
+        };
+        DiagramView.prototype.onDragEnd = function (event) {
+            var block = this.getBlockUnderCursor(event);
+            if (this.selectedBlocks.indexOf(block) == -1) {
+                this.selectedBlocks = [block];
+            }
+            this.dragging = false;
+        };
+        DiagramView.prototype.onMouseDown = function (event) {
+            this.handleSelection(event);
         };
         DiagramView.prototype.onMouseMove = function (event) {
             if (this.getBlockUnderCursor(event)) {
@@ -67,7 +84,7 @@ define("diagramView", ["require", "exports"], function (require, exports) {
             else {
                 this.canvas.style.cursor = 'default';
             }
-            if (this.moving) {
+            if (this.dragging) {
                 this.selectedBlocks.forEach(function (obj) {
                 });
             }
@@ -77,7 +94,9 @@ define("diagramView", ["require", "exports"], function (require, exports) {
             }
         };
         DiagramView.prototype.onMouseUp = function (event) {
-            this.moving = false;
+            if (this.dragging) {
+                this.onDragEnd(event);
+            }
             this.resizing = false;
         };
         DiagramView.prototype.drawingLoop = function () {

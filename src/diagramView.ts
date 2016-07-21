@@ -19,7 +19,7 @@ export class DiagramView {
 
     blocks: DiagramBlock[] = [];
     selectedBlocks: DiagramBlock[] = [];
-    moving = false;
+    dragging = false;
     resizing = false;
 
     constructor(width: number, height: number) {
@@ -66,20 +66,44 @@ export class DiagramView {
         return null;
     }
 
-    private onMouseDown(event: MouseEvent) {
+    private handleSelection(event: MouseEvent) {
         let block = this.getBlockUnderCursor(event);
-        if(!event.ctrlKey && block) {
-            this.selectedBlocks = [block];
-        } else if(event.ctrlKey) {
-            if(this.selectedBlocks.indexOf(block) > -1) {
-                this.selectedBlocks.filter(el => el != block);
-            } else {
+        let wasPreviouslySelected = this.selectedBlocks.indexOf(block) != -1;
+        if(block) {
+            if(event.ctrlKey) {
+                if(wasPreviouslySelected) {
+                    this.selectedBlocks = this.selectedBlocks.filter(el => el != block);
+                    return;
+                }
                 this.selectedBlocks.push(block);
+                return;
             }
-        } else {
+            if(!wasPreviouslySelected) {
+                this.selectedBlocks = [block];
+            }
+            this.onDragStart(event);
+            return;
+        }
+        if(!event.ctrlKey) {
             this.selectedBlocks = [];
         }
-        console.log(this.selectedBlocks);
+    }
+
+    private onDragStart(event: MouseEvent) {
+        this.dragging = true;
+    }
+
+    private onDragEnd(event: MouseEvent) {
+        let block = this.getBlockUnderCursor(event);
+        if(this.selectedBlocks.indexOf(block) == -1) {
+            this.selectedBlocks = [block];
+        }
+
+        this.dragging = false;
+    }
+
+    private onMouseDown(event: MouseEvent) {
+        this.handleSelection(event);
     }
 
     private onMouseMove(event: MouseEvent) {
@@ -89,7 +113,7 @@ export class DiagramView {
             this.canvas.style.cursor = 'default';
         }
 
-        if(this.moving) {
+        if(this.dragging) {
             this.selectedBlocks.forEach(obj => {
 
             });
@@ -102,7 +126,9 @@ export class DiagramView {
     }
 
     private onMouseUp(event: MouseEvent) {
-        this.moving = false;
+        if(this.dragging) {
+            this.onDragEnd(event);
+        }
         this.resizing = false;
     }
 
