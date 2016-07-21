@@ -6,6 +6,8 @@ define("diagramView", ["require", "exports"], function (require, exports) {
             this.selectedBlocks = [];
             this.dragging = false;
             this.resizing = false;
+            this.mouseDownPositionX = 0;
+            this.mouseDownPositionY = 0;
             var canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
@@ -65,28 +67,30 @@ define("diagramView", ["require", "exports"], function (require, exports) {
             }
         };
         DiagramView.prototype.onDragStart = function (event) {
+            this.canvas.style.cursor = 'move';
             this.dragging = true;
         };
+        DiagramView.prototype.onDragMove = function (event) {
+            var _this = this;
+            this.selectedBlocks.filter(function (b) { return b.draggable; }).forEach(function (block) {
+                block.setDragOffset(event.clientX - _this.mouseDownPositionX, event.clientY - _this.mouseDownPositionY);
+            });
+        };
         DiagramView.prototype.onDragEnd = function (event) {
-            var block = this.getBlockUnderCursor(event);
-            if (this.selectedBlocks.indexOf(block) == -1) {
-                this.selectedBlocks = [block];
-            }
+            this.selectedBlocks.filter(function (b) { return b.draggable; }).forEach(function (block) {
+                block.dragEnd();
+            });
+            this.canvas.style.cursor = 'default';
             this.dragging = false;
         };
         DiagramView.prototype.onMouseDown = function (event) {
             this.handleSelection(event);
+            this.mouseDownPositionX = event.clientX;
+            this.mouseDownPositionY = event.clientY;
         };
         DiagramView.prototype.onMouseMove = function (event) {
-            if (this.getBlockUnderCursor(event)) {
-                this.canvas.style.cursor = 'move';
-            }
-            else {
-                this.canvas.style.cursor = 'default';
-            }
             if (this.dragging) {
-                this.selectedBlocks.forEach(function (obj) {
-                });
+                this.onDragMove(event);
             }
             if (this.resizing) {
                 this.selectedBlocks.forEach(function (obj) {
@@ -134,16 +138,20 @@ define("blocks", ["require", "exports"], function (require, exports) {
         function ConditionBlock(top, left, conditionText) {
             this.type = BlockType.Condition;
             this.resizable = true;
-            this.movable = true;
+            this.draggable = true;
             this.diagonal = 100;
+            this.dragOffsetX = 0;
+            this.dragOffsetY = 0;
             this.top = top;
             this.left = left;
             this.conditionText = conditionText;
         }
         ConditionBlock.prototype.drawInContext = function (context) {
+            var posX = this.left + this.dragOffsetX;
+            var posY = this.top + this.dragOffsetY;
             var rectangleSide = this.diagonal / Math.sqrt(2);
             context.save();
-            context.translate(this.left, this.top);
+            context.translate(posX, posY);
             context.save();
             context.translate(this.diagonal / 2, this.diagonal / 2);
             context.font = "16px sans-serif";
@@ -158,11 +166,21 @@ define("blocks", ["require", "exports"], function (require, exports) {
         };
         ConditionBlock.prototype.getBoundingSquare = function (padding) {
             return {
-                top: this.top - padding,
-                left: this.left - padding,
+                top: this.top - padding + this.dragOffsetY,
+                left: this.left - padding + this.dragOffsetX,
                 width: this.diagonal + 2 * padding,
                 height: this.diagonal + 2 * padding
             };
+        };
+        ConditionBlock.prototype.setDragOffset = function (x, y) {
+            this.dragOffsetX = x;
+            this.dragOffsetY = y;
+        };
+        ConditionBlock.prototype.dragEnd = function () {
+            this.top += this.dragOffsetY;
+            this.left += this.dragOffsetX;
+            this.dragOffsetX = 0;
+            this.dragOffsetY = 0;
         };
         return ConditionBlock;
     }());
