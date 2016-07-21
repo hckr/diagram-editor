@@ -7,10 +7,12 @@ export interface BoundingSquare {
 
 export interface DiagramBlock {
     id?: string; // optional; replaced during addition if object with provided id already exists on diagram
-    resizable: Boolean;
-    movable: Boolean;
-    drawInContext(context: CanvasRenderingContext2D): any;
+    resizable: boolean;
+    draggable: boolean;
+    drawInContext(context: CanvasRenderingContext2D): void;
     getBoundingSquare(padding: number): BoundingSquare;
+    setDragOffset(x: number, y: number): void;
+    dragEnd(): void;
 }
 
 export class DiagramView {
@@ -21,6 +23,9 @@ export class DiagramView {
     selectedBlocks: DiagramBlock[] = [];
     dragging = false;
     resizing = false;
+
+    mouseDownPositionX = 0;
+    mouseDownPositionY = 0;
 
     constructor(width: number, height: number) {
         let canvas = document.createElement('canvas');
@@ -90,33 +95,34 @@ export class DiagramView {
     }
 
     private onDragStart(event: MouseEvent) {
+        this.canvas.style.cursor = 'move';
         this.dragging = true;
     }
 
-    private onDragEnd(event: MouseEvent) {
-        let block = this.getBlockUnderCursor(event);
-        if(this.selectedBlocks.indexOf(block) == -1) {
-            this.selectedBlocks = [block];
-        }
+    private onDragMove(event: MouseEvent) {
+        this.selectedBlocks.filter(b => b.draggable).forEach(block => {
+            block.setDragOffset(event.clientX - this.mouseDownPositionX,
+                                event.clientY - this.mouseDownPositionY);
+        });
+    }
 
+    private onDragEnd(event: MouseEvent) {
+        this.selectedBlocks.filter(b => b.draggable).forEach(block => {
+            block.dragEnd();
+        });
+        this.canvas.style.cursor = 'default';
         this.dragging = false;
     }
 
     private onMouseDown(event: MouseEvent) {
         this.handleSelection(event);
+        this.mouseDownPositionX = event.clientX;
+        this.mouseDownPositionY = event.clientY;
     }
 
     private onMouseMove(event: MouseEvent) {
-        if(this.getBlockUnderCursor(event)) {
-            this.canvas.style.cursor = 'move';
-        } else {
-            this.canvas.style.cursor = 'default';
-        }
-
         if(this.dragging) {
-            this.selectedBlocks.forEach(obj => {
-
-            });
+            this.onDragMove(event);
         }
         if(this.resizing) {
             this.selectedBlocks.forEach(obj => {
