@@ -40,7 +40,7 @@ export class ConditionBlock implements Block, DiagramBlock {
         context.translate(posX, posY);
         context.rotate(0.25 * Math.PI);
         context.translate(rectangleSide/2, -rectangleSide/2);
-        context.fillStyle = "#fff";
+        context.fillStyle = '#fff';
         context.fillRect(0, 0, rectangleSide, rectangleSide);
         context.strokeRect(0, 0, rectangleSide, rectangleSide);
         context.restore();
@@ -48,9 +48,9 @@ export class ConditionBlock implements Block, DiagramBlock {
         context.save();
         context.translate(posX, posY);
         context.translate(this.diagonal/2, this.diagonal/2);
-        context.font = "16px sans-serif";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
+        context.font = '16px sans-serif';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
         context.fillText(this.conditionText, 0, 0);
         context.restore();
     }

@@ -52,7 +52,7 @@ export class DiagramView {
         canvas.height = height;
 
         this.canvas = canvas;
-        this.context = canvas.getContext("2d");
+        this.context = canvas.getContext('2d');
 
         this.registerEvents();
         this.drawingLoop();

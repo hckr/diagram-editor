@@ -29,7 +29,7 @@ define("diagramView", ["require", "exports"], function (require, exports) {
             canvas.width = width;
             canvas.height = height;
             this.canvas = canvas;
-            this.context = canvas.getContext("2d");
+            this.context = canvas.getContext('2d');
             this.registerEvents();
             this.drawingLoop();
         }
@@ -177,16 +177,16 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
             context.translate(posX, posY);
             context.rotate(0.25 * Math.PI);
             context.translate(rectangleSide / 2, -rectangleSide / 2);
-            context.fillStyle = "#fff";
+            context.fillStyle = '#fff';
             context.fillRect(0, 0, rectangleSide, rectangleSide);
             context.strokeRect(0, 0, rectangleSide, rectangleSide);
             context.restore();
             context.save();
             context.translate(posX, posY);
             context.translate(this.diagonal / 2, this.diagonal / 2);
-            context.font = "16px sans-serif";
-            context.textAlign = "center";
-            context.textBaseline = "middle";
+            context.font = '16px sans-serif';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
             context.fillText(this.conditionText, 0, 0);
             context.restore();
         };
