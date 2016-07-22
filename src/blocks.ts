@@ -38,26 +38,30 @@ export class ConditionBlock implements Block, DiagramBlock {
         let rectangleSide = this.diagonal / Math.sqrt(2);
         context.save();
         context.translate(posX, posY);
+        context.rotate(0.25 * Math.PI);
+        context.translate(rectangleSide/2, -rectangleSide/2);
+        context.fillStyle = "#fff";
+        context.fillRect(0, 0, rectangleSide, rectangleSide);
+        context.strokeRect(0, 0, rectangleSide, rectangleSide);
+        context.restore();
+        
         context.save();
+        context.translate(posX, posY);
         context.translate(this.diagonal/2, this.diagonal/2);
         context.font = "16px sans-serif";
         context.textAlign = "center";
         context.textBaseline = "middle";
         context.fillText(this.conditionText, 0, 0);
         context.restore();
-        context.rotate(0.25 * Math.PI);
-        context.translate(rectangleSide/2, -rectangleSide/2);
-        context.strokeRect(0, 0, rectangleSide, rectangleSide);
-        context.restore();
     }
 
-    getBoundingSquare(padding: number): BoundingSquare {
-        return {
-            top: this.top - padding + this.dragOffsetY,
-            left: this.left - padding + this.dragOffsetX,
-            width: this.diagonal + 2 * padding,
-            height: this.diagonal + 2 * padding
-        }
+    getBoundingSquare(padding: number) {
+        return new BoundingSquare(
+            this.top - padding + this.dragOffsetY,
+            this.left - padding + this.dragOffsetX,
+            this.diagonal + 2 * padding,
+            this.diagonal + 2 * padding
+        );
     }
 
     setDragOffset(x: number, y: number) {

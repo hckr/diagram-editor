@@ -1,5 +1,6 @@
 import { DiagramView } from 'diagramView'
 import { ConditionBlock } from 'blocks'
+import { NormalConnection } from 'connections'
 
 export class DiagramEditor {
     private canvas: HTMLCanvasElement;
@@ -8,8 +9,13 @@ export class DiagramEditor {
     constructor(width: number, height: number) {
         this.diagramView = new DiagramView(width, height);
 
-        this.diagramView.addBlock(new ConditionBlock(20, 20, "one"));
-        this.diagramView.addBlock(new ConditionBlock(100, 200, "two"));
+        let blocks = [
+            new ConditionBlock(20, 20, 'one'),
+            new ConditionBlock(100, 300, 'two'),
+            new ConditionBlock(200, 100, 'three')
+        ];
+        blocks.forEach(b => this.diagramView.addBlock(b));
+        this.diagramView.addConnection(new NormalConnection(blocks[0], blocks[1]));
     }
 
     appendTo(element: HTMLElement): void {

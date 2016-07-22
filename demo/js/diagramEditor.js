@@ -1,9 +1,26 @@
 define("diagramView", ["require", "exports"], function (require, exports) {
     "use strict";
+    var BoundingSquare = (function () {
+        function BoundingSquare(top, left, width, height) {
+            this.top = top;
+            this.left = left;
+            this.width = width;
+            this.height = height;
+        }
+        BoundingSquare.prototype.getCenterPoint = function () {
+            return {
+                x: this.left + Math.floor(this.width / 2),
+                y: this.top + Math.floor(this.height / 2)
+            };
+        };
+        return BoundingSquare;
+    }());
+    exports.BoundingSquare = BoundingSquare;
     var DiagramView = (function () {
         function DiagramView(width, height) {
             this.blocks = [];
             this.selectedBlocks = [];
+            this.connections = [];
             this.dragging = false;
             this.resizing = false;
             this.mouseDownPositionX = 0;
@@ -18,6 +35,9 @@ define("diagramView", ["require", "exports"], function (require, exports) {
         }
         DiagramView.prototype.addBlock = function (block) {
             this.blocks.push(block);
+        };
+        DiagramView.prototype.addConnection = function (connection) {
+            this.connections.push(connection);
         };
         DiagramView.prototype.registerEvents = function () {
             var _this = this;
@@ -106,6 +126,9 @@ define("diagramView", ["require", "exports"], function (require, exports) {
         DiagramView.prototype.drawingLoop = function () {
             var _this = this;
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.connections.forEach(function (connection) {
+                connection.drawInContext(_this.context);
+            });
             this.blocks.forEach(function (block) {
                 block.drawInContext(_this.context);
             });
@@ -124,7 +147,7 @@ define("diagramView", ["require", "exports"], function (require, exports) {
     }());
     exports.DiagramView = DiagramView;
 });
-define("blocks", ["require", "exports"], function (require, exports) {
+define("blocks", ["require", "exports", "diagramView"], function (require, exports, diagramView_1) {
     "use strict";
     // enum value can be read as string, e.g.: blockType[blockType.Entry]
     (function (BlockType) {
@@ -152,25 +175,23 @@ define("blocks", ["require", "exports"], function (require, exports) {
             var rectangleSide = this.diagonal / Math.sqrt(2);
             context.save();
             context.translate(posX, posY);
+            context.rotate(0.25 * Math.PI);
+            context.translate(rectangleSide / 2, -rectangleSide / 2);
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, rectangleSide, rectangleSide);
+            context.strokeRect(0, 0, rectangleSide, rectangleSide);
+            context.restore();
             context.save();
+            context.translate(posX, posY);
             context.translate(this.diagonal / 2, this.diagonal / 2);
             context.font = "16px sans-serif";
             context.textAlign = "center";
             context.textBaseline = "middle";
             context.fillText(this.conditionText, 0, 0);
             context.restore();
-            context.rotate(0.25 * Math.PI);
-            context.translate(rectangleSide / 2, -rectangleSide / 2);
-            context.strokeRect(0, 0, rectangleSide, rectangleSide);
-            context.restore();
         };
         ConditionBlock.prototype.getBoundingSquare = function (padding) {
-            return {
-                top: this.top - padding + this.dragOffsetY,
-                left: this.left - padding + this.dragOffsetX,
-                width: this.diagonal + 2 * padding,
-                height: this.diagonal + 2 * padding
-            };
+            return new diagramView_1.BoundingSquare(this.top - padding + this.dragOffsetY, this.left - padding + this.dragOffsetX, this.diagonal + 2 * padding, this.diagonal + 2 * padding);
         };
         ConditionBlock.prototype.setDragOffset = function (x, y) {
             this.dragOffsetX = x;
@@ -186,13 +207,38 @@ define("blocks", ["require", "exports"], function (require, exports) {
     }());
     exports.ConditionBlock = ConditionBlock;
 });
-define("diagramEditor", ["require", "exports", "diagramView", "blocks"], function (require, exports, diagramView_1, blocks_1) {
+define("connections", ["require", "exports"], function (require, exports) {
+    "use strict";
+    var NormalConnection = (function () {
+        function NormalConnection(from, to) {
+            this.from = from;
+            this.to = to;
+        }
+        NormalConnection.prototype.drawInContext = function (context) {
+            var center1 = this.from.getBoundingSquare(0).getCenterPoint();
+            var center2 = this.to.getBoundingSquare(0).getCenterPoint();
+            context.beginPath();
+            context.moveTo(center1.x, center1.y);
+            context.lineTo(center2.x, center2.y);
+            context.stroke();
+        };
+        return NormalConnection;
+    }());
+    exports.NormalConnection = NormalConnection;
+});
+define("diagramEditor", ["require", "exports", "diagramView", "blocks", "connections"], function (require, exports, diagramView_2, blocks_1, connections_1) {
     "use strict";
     var DiagramEditor = (function () {
         function DiagramEditor(width, height) {
-            this.diagramView = new diagramView_1.DiagramView(width, height);
-            this.diagramView.addBlock(new blocks_1.ConditionBlock(20, 20, "one"));
-            this.diagramView.addBlock(new blocks_1.ConditionBlock(100, 200, "two"));
+            var _this = this;
+            this.diagramView = new diagramView_2.DiagramView(width, height);
+            var blocks = [
+                new blocks_1.ConditionBlock(20, 20, 'one'),
+                new blocks_1.ConditionBlock(100, 300, 'two'),
+                new blocks_1.ConditionBlock(200, 100, 'three')
+            ];
+            blocks.forEach(function (b) { return _this.diagramView.addBlock(b); });
+            this.diagramView.addConnection(new connections_1.NormalConnection(blocks[0], blocks[1]));
         }
         DiagramEditor.prototype.appendTo = function (element) {
             element.appendChild(this.diagramView.canvas);

@@ -1,18 +1,36 @@
-export interface BoundingSquare {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
+export interface Point {
+    x: number;
+    y: number;
 }
 
-export interface DiagramBlock {
+export class BoundingSquare {
+    constructor(public top: number, public left: number, public width: number, public height: number) { }
+
+    getCenterPoint(): Point {
+        return {
+            x: this.left + Math.floor(this.width / 2),
+            y: this.top + Math.floor(this.height / 2)
+        }
+    }
+}
+
+interface DiagramElement {
+    drawInContext(context: CanvasRenderingContext2D): void;
+}
+
+export interface DiagramBlock extends DiagramElement {
     id?: string; // optional; replaced during addition if object with provided id already exists on diagram
     resizable: boolean;
     draggable: boolean;
-    drawInContext(context: CanvasRenderingContext2D): void;
     getBoundingSquare(padding: number): BoundingSquare;
     setDragOffset(x: number, y: number): void;
     dragEnd(): void;
+}
+
+export interface DiagramConnection extends DiagramElement {
+    id?: string; // optional; replaced during addition if object with provided id already exists on diagram
+    from: DiagramBlock;
+    to: DiagramBlock;
 }
 
 export class DiagramView {
@@ -21,6 +39,7 @@ export class DiagramView {
 
     blocks: DiagramBlock[] = [];
     selectedBlocks: DiagramBlock[] = [];
+    connections: DiagramConnection[] = [];
     dragging = false;
     resizing = false;
 
@@ -41,6 +60,10 @@ export class DiagramView {
 
     addBlock(block: DiagramBlock): void {
         this.blocks.push(block);
+    }
+
+    addConnection(connection: DiagramConnection): void {
+        this.connections.push(connection);
     }
 
     private registerEvents(): void {
@@ -140,6 +163,9 @@ export class DiagramView {
 
     private drawingLoop(): void {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.connections.forEach(connection => {
+            connection.drawInContext(this.context);
+        });
         this.blocks.forEach(block => {
             block.drawInContext(this.context);
         });
