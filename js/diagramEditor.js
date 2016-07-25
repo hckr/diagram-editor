@@ -162,7 +162,8 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
             this.type = BlockType.Condition;
             this.resizable = true;
             this.draggable = true;
-            this.diagonal = 100;
+            this.diagonalX = 100;
+            this.diagonalY = 50;
             this.dragOffsetX = 0;
             this.dragOffsetY = 0;
             this.top = top;
@@ -172,18 +173,21 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
         ConditionBlock.prototype.drawInContext = function (context) {
             var posX = this.left + this.dragOffsetX;
             var posY = this.top + this.dragOffsetY;
-            var rectangleSide = this.diagonal / Math.sqrt(2);
             context.save();
-            context.translate(posX, posY);
-            context.rotate(0.25 * Math.PI);
-            context.translate(rectangleSide / 2, -rectangleSide / 2);
             context.fillStyle = '#fff';
-            context.fillRect(0, 0, rectangleSide, rectangleSide);
-            context.strokeRect(0, 0, rectangleSide, rectangleSide);
+            context.beginPath();
+            context.translate(posX, posY);
+            context.moveTo(0, this.diagonalY / 2);
+            context.lineTo(this.diagonalX / 2, 0);
+            context.lineTo(this.diagonalX, this.diagonalY / 2);
+            context.lineTo(this.diagonalX / 2, this.diagonalY);
+            context.lineTo(0, this.diagonalY / 2);
+            context.stroke();
+            context.fill();
             context.restore();
             context.save();
             context.translate(posX, posY);
-            context.translate(this.diagonal / 2, this.diagonal / 2);
+            context.translate(this.diagonalX / 2, this.diagonalY / 2);
             context.font = '16px sans-serif';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
@@ -191,7 +195,7 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
             context.restore();
         };
         ConditionBlock.prototype.getBoundingSquare = function (padding) {
-            return new diagramView_1.BoundingSquare(this.top - padding + this.dragOffsetY, this.left - padding + this.dragOffsetX, this.diagonal + 2 * padding, this.diagonal + 2 * padding);
+            return new diagramView_1.BoundingSquare(this.top - padding + this.dragOffsetY, this.left - padding + this.dragOffsetX, this.diagonalX + 2 * padding, this.diagonalY + 2 * padding);
         };
         ConditionBlock.prototype.setDragOffset = function (x, y) {
             this.dragOffsetX = x;
