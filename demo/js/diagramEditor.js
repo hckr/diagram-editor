@@ -197,6 +197,14 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
         ConditionBlock.prototype.getBoundingSquare = function (padding) {
             return new diagramView_1.BoundingSquare(this.top - padding + this.dragOffsetY, this.left - padding + this.dragOffsetX, this.diagonalX + 2 * padding, this.diagonalY + 2 * padding);
         };
+        ConditionBlock.prototype.getPossibleConnectionPoints = function () {
+            return [
+                { x: this.left + this.diagonalX / 2 + this.dragOffsetX, y: this.top + this.dragOffsetY },
+                { x: this.left + this.diagonalX / 2 + this.dragOffsetX, y: this.top + this.diagonalY + this.dragOffsetY },
+                { x: this.left + this.dragOffsetX, y: this.top + this.diagonalY / 2 + this.dragOffsetY },
+                { x: this.left + this.diagonalX + this.dragOffsetX, y: this.top + this.diagonalY / 2 + this.dragOffsetY }
+            ];
+        };
         ConditionBlock.prototype.setDragOffset = function (x, y) {
             this.dragOffsetX = x;
             this.dragOffsetY = y;
@@ -219,11 +227,26 @@ define("connections", ["require", "exports"], function (require, exports) {
             this.to = to;
         }
         NormalConnection.prototype.drawInContext = function (context) {
-            var center1 = this.from.getBoundingSquare(0).getCenterPoint();
-            var center2 = this.to.getBoundingSquare(0).getCenterPoint();
+            var connectionPointsFrom = this.from.getPossibleConnectionPoints();
+            var connectionPointsTo = this.to.getPossibleConnectionPoints();
+            var bestPointFrom, bestPointTo;
+            var smallestDistance = Number.MAX_VALUE;
+            for (var _i = 0, connectionPointsFrom_1 = connectionPointsFrom; _i < connectionPointsFrom_1.length; _i++) {
+                var pointFrom = connectionPointsFrom_1[_i];
+                for (var _a = 0, connectionPointsTo_1 = connectionPointsTo; _a < connectionPointsTo_1.length; _a++) {
+                    var pointTo = connectionPointsTo_1[_a];
+                    var distance = Math.sqrt(Math.abs(pointFrom.x - pointTo.x) +
+                        Math.abs(pointFrom.y - pointTo.y));
+                    if (distance < smallestDistance) {
+                        bestPointFrom = pointFrom;
+                        bestPointTo = pointTo;
+                        smallestDistance = distance;
+                    }
+                }
+            }
             context.beginPath();
-            context.moveTo(center1.x, center1.y);
-            context.lineTo(center2.x, center2.y);
+            context.moveTo(bestPointFrom.x, bestPointFrom.y);
+            context.lineTo(bestPointTo.x, bestPointTo.y);
             context.stroke();
         };
         return NormalConnection;

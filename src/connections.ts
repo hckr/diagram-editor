@@ -1,4 +1,4 @@
-import { DiagramConnection, DiagramBlock } from 'diagramView'
+import { DiagramConnection, DiagramBlock, Point } from 'diagramView'
 
 export class NormalConnection implements DiagramConnection {
     constructor(public from: DiagramBlock, public to: DiagramBlock) {
@@ -6,11 +6,28 @@ export class NormalConnection implements DiagramConnection {
     }
 
     drawInContext(context: CanvasRenderingContext2D) {
-        let center1 = this.from.getBoundingSquare(0).getCenterPoint();
-        let center2 = this.to.getBoundingSquare(0).getCenterPoint();
+        let connectionPointsFrom = this.from.getPossibleConnectionPoints();
+        let connectionPointsTo = this.to.getPossibleConnectionPoints();
+
+        let bestPointFrom: Point, bestPointTo: Point;
+        let smallestDistance = Number.MAX_VALUE;
+
+        for(let pointFrom of connectionPointsFrom) {
+            for(let pointTo of connectionPointsTo) {
+                let distance = Math.sqrt(
+                    Math.abs(pointFrom.x - pointTo.x) +
+                    Math.abs(pointFrom.y - pointTo.y));
+                if(distance < smallestDistance) {
+                    bestPointFrom = pointFrom;
+                    bestPointTo = pointTo;
+                    smallestDistance = distance;
+                }
+            }
+        }
+
         context.beginPath();
-        context.moveTo(center1.x, center1.y);
-        context.lineTo(center2.x, center2.y);
+        context.moveTo(bestPointFrom.x, bestPointFrom.y);
+        context.lineTo(bestPointTo.x, bestPointTo.y);
         context.stroke();
     }
 }

@@ -23,6 +23,7 @@ export interface DiagramBlock extends DiagramElement {
     resizable: boolean;
     draggable: boolean;
     getBoundingSquare(padding: number): BoundingSquare;
+    getPossibleConnectionPoints(): Point[];
     setDragOffset(x: number, y: number): void;
     dragEnd(): void;
 }
