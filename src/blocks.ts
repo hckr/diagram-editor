@@ -20,7 +20,8 @@ export class ConditionBlock implements Block, DiagramBlock {
     top: number;
     left: number;
     conditionText: string;
-    diagonal = 100;
+    diagonalX = 100;
+    diagonalY = 50;
 
     dragOffsetX = 0;
     dragOffsetY = 0;
@@ -35,19 +36,22 @@ export class ConditionBlock implements Block, DiagramBlock {
         let posX = this.left + this.dragOffsetX;
         let posY = this.top + this.dragOffsetY;
 
-        let rectangleSide = this.diagonal / Math.sqrt(2);
         context.save();
-        context.translate(posX, posY);
-        context.rotate(0.25 * Math.PI);
-        context.translate(rectangleSide/2, -rectangleSide/2);
         context.fillStyle = '#fff';
-        context.fillRect(0, 0, rectangleSide, rectangleSide);
-        context.strokeRect(0, 0, rectangleSide, rectangleSide);
+        context.beginPath();
+        context.translate(posX, posY);
+        context.moveTo(0, this.diagonalY / 2);
+        context.lineTo(this.diagonalX / 2, 0);
+        context.lineTo(this.diagonalX, this.diagonalY / 2);
+        context.lineTo(this.diagonalX / 2, this.diagonalY);
+        context.lineTo(0, this.diagonalY / 2);
+        context.stroke();
+        context.fill();
         context.restore();
-        
+
         context.save();
         context.translate(posX, posY);
-        context.translate(this.diagonal/2, this.diagonal/2);
+        context.translate(this.diagonalX / 2, this.diagonalY / 2);
         context.font = '16px sans-serif';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
@@ -59,8 +63,8 @@ export class ConditionBlock implements Block, DiagramBlock {
         return new BoundingSquare(
             this.top - padding + this.dragOffsetY,
             this.left - padding + this.dragOffsetX,
-            this.diagonal + 2 * padding,
-            this.diagonal + 2 * padding
+            this.diagonalX + 2 * padding,
+            this.diagonalY + 2 * padding
         );
     }
 
