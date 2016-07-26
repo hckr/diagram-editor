@@ -184,6 +184,9 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
         function ConditionBlock(top, left, conditionText, resizable, draggable) {
             if (resizable === void 0) { resizable = true; }
             if (draggable === void 0) { draggable = true; }
+            this.top = top;
+            this.left = left;
+            this.conditionText = conditionText;
             this.resizable = resizable;
             this.draggable = draggable;
             this.type = BlockType.Condition;
@@ -236,6 +239,63 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
         return ConditionBlock;
     }());
     exports.ConditionBlock = ConditionBlock;
+    var EntryBlock = (function () {
+        function EntryBlock(top, left, conditionText, resizable, draggable) {
+            if (resizable === void 0) { resizable = true; }
+            if (draggable === void 0) { draggable = true; }
+            this.top = top;
+            this.left = left;
+            this.conditionText = conditionText;
+            this.resizable = resizable;
+            this.draggable = draggable;
+            this.type = BlockType.Entry;
+            this.radiusX = 50;
+            this.radiusY = 25;
+            this.dragOffsetX = 0;
+            this.dragOffsetY = 0;
+            if (draggable) {
+                mixinDraggable(this);
+            }
+        }
+        EntryBlock.prototype.drawInContext = function (context) {
+            var posX = this.left + this.dragOffsetX;
+            var posY = this.top + this.dragOffsetY;
+            var centerX = posX + this.radiusX;
+            var centerY = posY + this.radiusY;
+            var scaleY = this.radiusY / this.radiusX;
+            context.save();
+            context.fillStyle = '#fff';
+            context.beginPath();
+            context.moveTo(centerX + this.radiusX * Math.cos(0), centerY + this.radiusY * Math.sin(0));
+            for (var step = 0.01, a = step; a < 2 * Math.PI; a += step) {
+                context.lineTo(centerX + this.radiusX * Math.cos(a), centerY + this.radiusY * Math.sin(a));
+            }
+            context.stroke();
+            context.fill();
+            context.restore();
+            context.save();
+            context.translate(posX, posY);
+            context.translate(this.radiusX, this.radiusY);
+            context.font = '16px sans-serif';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(this.conditionText, 0, 0);
+            context.restore();
+        };
+        EntryBlock.prototype.getBoundingSquare = function (padding) {
+            return new diagramView_1.BoundingSquare(this.top - padding + this.dragOffsetY, this.left - padding + this.dragOffsetX, (this.radiusX + padding) * 2, (this.radiusY + padding) * 2);
+        };
+        EntryBlock.prototype.getPossibleConnectionPoints = function () {
+            return [
+                new diagramView_1.Point(this.left + this.radiusX + this.dragOffsetX, this.top + this.dragOffsetY),
+                new diagramView_1.Point(this.left + this.radiusX + this.dragOffsetX, this.top + this.radiusY / 2 + this.dragOffsetY),
+                new diagramView_1.Point(this.left + this.dragOffsetX, this.top + this.radiusY + this.dragOffsetY),
+                new diagramView_1.Point(this.left + this.radiusX * 2 + this.dragOffsetX, this.top + this.radiusY + this.dragOffsetY)
+            ];
+        };
+        return EntryBlock;
+    }());
+    exports.EntryBlock = EntryBlock;
 });
 define("connections", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -277,7 +337,7 @@ define("diagramEditor", ["require", "exports", "diagramView", "blocks", "connect
             var _this = this;
             this.diagramView = new diagramView_2.DiagramView(width, height);
             var blocks = [
-                new blocks_1.ConditionBlock(20, 20, 'one'),
+                new blocks_1.EntryBlock(20, 40, 'START'),
                 new blocks_1.ConditionBlock(100, 300, 'two'),
                 new blocks_1.ConditionBlock(200, 100, 'three', true, false)
             ];

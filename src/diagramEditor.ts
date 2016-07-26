@@ -1,5 +1,5 @@
 import { DiagramView } from 'diagramView'
-import { ConditionBlock } from 'blocks'
+import { EntryBlock, ConditionBlock } from 'blocks'
 import { NormalConnection } from 'connections'
 
 export class DiagramEditor {
@@ -10,7 +10,7 @@ export class DiagramEditor {
         this.diagramView = new DiagramView(width, height);
 
         let blocks = [
-            new ConditionBlock(20, 20, 'one'),
+            new EntryBlock(20, 40, 'START'),
             new ConditionBlock(100, 300, 'two'),
             new ConditionBlock(200, 100, 'three', true, false)
         ];
