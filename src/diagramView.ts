@@ -28,8 +28,8 @@ export interface DiagramBlock extends DiagramElement {
     draggable: boolean;
     getBoundingSquare(padding: number): BoundingSquare;
     getPossibleConnectionPoints(): Point[];
-    setDragOffset(x: number, y: number): void;
-    dragEnd(): void;
+    setDragOffset?(x: number, y: number): void;
+    dragEnd?(): void;
 }
 
 export interface DiagramConnection extends DiagramElement {
@@ -114,7 +114,9 @@ export class DiagramView {
             if(!wasPreviouslySelected) {
                 this.selectedBlocks = [block];
             }
-            this.onDragStart(event);
+            if(block.draggable) {
+                this.onDragStart(event);
+            }
             return;
         }
         if(!event.ctrlKey) {

@@ -12,10 +12,27 @@ export interface Block {
     type: BlockType;
 }
 
+interface Draggable {
+
+}
+
+function mixinDraggable(block: DiagramBlock) {
+    block.setDragOffset = (function(x: number, y: number) {
+        this.dragOffsetX = x;
+        this.dragOffsetY = y;
+    }).bind(block);
+
+    block.dragEnd = (function() {
+        this.top += this.dragOffsetY;
+        this.left += this.dragOffsetX;
+
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
+    }).bind(block);
+}
+
 export class ConditionBlock implements Block, DiagramBlock {
     type = BlockType.Condition;
-    resizable = true;
-    draggable = true;
 
     top: number;
     left: number;
@@ -26,10 +43,15 @@ export class ConditionBlock implements Block, DiagramBlock {
     dragOffsetX = 0;
     dragOffsetY = 0;
 
-    constructor(top: number, left: number, conditionText: string) {
+    constructor(top: number, left: number, conditionText: string,
+                public resizable = true, public draggable = true)
+    {
         this.top = top;
         this.left = left;
         this.conditionText = conditionText;
+        if(draggable) {
+            mixinDraggable(this);
+        }
     }
 
     drawInContext(context: CanvasRenderingContext2D) {
@@ -83,18 +105,5 @@ export class ConditionBlock implements Block, DiagramBlock {
                 this.left + this.diagonalX + this.dragOffsetX,
                 this.top + this.diagonalY / 2 + this.dragOffsetY)
         ]
-    }
-
-    setDragOffset(x: number, y: number) {
-        this.dragOffsetX = x;
-        this.dragOffsetY = y;
-    }
-
-    dragEnd() {
-        this.top += this.dragOffsetY;
-        this.left += this.dragOffsetX;
-
-        this.dragOffsetX = 0;
-        this.dragOffsetY = 0;
     }
 }
