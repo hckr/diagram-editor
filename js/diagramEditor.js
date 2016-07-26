@@ -88,7 +88,9 @@ define("diagramView", ["require", "exports"], function (require, exports) {
                 if (!wasPreviouslySelected) {
                     this.selectedBlocks = [block];
                 }
-                this.onDragStart(event);
+                if (block.draggable) {
+                    this.onDragStart(event);
+                }
                 return;
             }
             if (!event.ctrlKey) {
@@ -166,11 +168,25 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
         BlockType[BlockType["Exit"] = 3] = "Exit";
     })(exports.BlockType || (exports.BlockType = {}));
     var BlockType = exports.BlockType;
+    function mixinDraggable(block) {
+        block.setDragOffset = (function (x, y) {
+            this.dragOffsetX = x;
+            this.dragOffsetY = y;
+        }).bind(block);
+        block.dragEnd = (function () {
+            this.top += this.dragOffsetY;
+            this.left += this.dragOffsetX;
+            this.dragOffsetX = 0;
+            this.dragOffsetY = 0;
+        }).bind(block);
+    }
     var ConditionBlock = (function () {
-        function ConditionBlock(top, left, conditionText) {
+        function ConditionBlock(top, left, conditionText, resizable, draggable) {
+            if (resizable === void 0) { resizable = true; }
+            if (draggable === void 0) { draggable = true; }
+            this.resizable = resizable;
+            this.draggable = draggable;
             this.type = BlockType.Condition;
-            this.resizable = true;
-            this.draggable = true;
             this.diagonalX = 100;
             this.diagonalY = 50;
             this.dragOffsetX = 0;
@@ -178,6 +194,9 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
             this.top = top;
             this.left = left;
             this.conditionText = conditionText;
+            if (draggable) {
+                mixinDraggable(this);
+            }
         }
         ConditionBlock.prototype.drawInContext = function (context) {
             var posX = this.left + this.dragOffsetX;
@@ -213,16 +232,6 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
                 new diagramView_1.Point(this.left + this.dragOffsetX, this.top + this.diagonalY / 2 + this.dragOffsetY),
                 new diagramView_1.Point(this.left + this.diagonalX + this.dragOffsetX, this.top + this.diagonalY / 2 + this.dragOffsetY)
             ];
-        };
-        ConditionBlock.prototype.setDragOffset = function (x, y) {
-            this.dragOffsetX = x;
-            this.dragOffsetY = y;
-        };
-        ConditionBlock.prototype.dragEnd = function () {
-            this.top += this.dragOffsetY;
-            this.left += this.dragOffsetX;
-            this.dragOffsetX = 0;
-            this.dragOffsetY = 0;
         };
         return ConditionBlock;
     }());
@@ -270,7 +279,7 @@ define("diagramEditor", ["require", "exports", "diagramView", "blocks", "connect
             var blocks = [
                 new blocks_1.ConditionBlock(20, 20, 'one'),
                 new blocks_1.ConditionBlock(100, 300, 'two'),
-                new blocks_1.ConditionBlock(200, 100, 'three')
+                new blocks_1.ConditionBlock(200, 100, 'three', true, false)
             ];
             blocks.forEach(function (b) { return _this.diagramView.addBlock(b); });
             this.diagramView.addConnection(new connections_1.NormalConnection(blocks[0], blocks[1]));
