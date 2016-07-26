@@ -1,16 +1,20 @@
-export interface Point {
-    x: number;
-    y: number;
+export class Point {
+    constructor(public x: number, public y: number) { }
+
+    distanceTo(other: Point) {
+        return Math.sqrt(
+            Math.abs(this.x - other.x) +
+            Math.abs(this.y - other.y));
+    }
 }
 
 export class BoundingSquare {
     constructor(public top: number, public left: number, public width: number, public height: number) { }
 
     getCenterPoint(): Point {
-        return {
-            x: this.left + Math.floor(this.width / 2),
-            y: this.top + Math.floor(this.height / 2)
-        }
+        return new Point(
+            this.left + Math.floor(this.width / 2),
+            this.top + Math.floor(this.height / 2));
     }
 }
 

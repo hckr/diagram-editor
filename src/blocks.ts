@@ -1,4 +1,4 @@
-import { DiagramBlock, BoundingSquare } from 'diagramView'
+import { DiagramBlock, BoundingSquare, Point } from 'diagramView'
 
 // enum value can be read as string, e.g.: blockType[blockType.Entry]
 export enum BlockType {
@@ -70,10 +70,18 @@ export class ConditionBlock implements Block, DiagramBlock {
 
     getPossibleConnectionPoints() {
         return [
-            { x: this.left + this.diagonalX / 2 + this.dragOffsetX, y: this.top + this.dragOffsetY },
-            { x: this.left + this.diagonalX / 2 + this.dragOffsetX, y: this.top + this.diagonalY + this.dragOffsetY },
-            { x: this.left + this.dragOffsetX, y: this.top + this.diagonalY / 2 + this.dragOffsetY },
-            { x: this.left + this.diagonalX + this.dragOffsetX, y: this.top + this.diagonalY / 2 + this.dragOffsetY }
+            new Point(
+                this.left + this.diagonalX / 2 + this.dragOffsetX,
+                this.top + this.dragOffsetY),
+            new Point(
+                this.left + this.diagonalX / 2 + this.dragOffsetX,
+                this.top + this.diagonalY + this.dragOffsetY),
+            new Point(
+                this.left + this.dragOffsetX,
+                this.top + this.diagonalY / 2 + this.dragOffsetY),
+            new Point(
+                this.left + this.diagonalX + this.dragOffsetX,
+                this.top + this.diagonalY / 2 + this.dragOffsetY)
         ]
     }
 

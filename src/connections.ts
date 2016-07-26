@@ -14,9 +14,7 @@ export class NormalConnection implements DiagramConnection {
 
         for(let pointFrom of connectionPointsFrom) {
             for(let pointTo of connectionPointsTo) {
-                let distance = Math.sqrt(
-                    Math.abs(pointFrom.x - pointTo.x) +
-                    Math.abs(pointFrom.y - pointTo.y));
+                let distance = pointFrom.distanceTo(pointTo);
                 if(distance < smallestDistance) {
                     bestPointFrom = pointFrom;
                     bestPointTo = pointTo;
