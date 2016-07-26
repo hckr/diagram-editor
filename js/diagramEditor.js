@@ -1,5 +1,17 @@
 define("diagramView", ["require", "exports"], function (require, exports) {
     "use strict";
+    var Point = (function () {
+        function Point(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        Point.prototype.distanceTo = function (other) {
+            return Math.sqrt(Math.abs(this.x - other.x) +
+                Math.abs(this.y - other.y));
+        };
+        return Point;
+    }());
+    exports.Point = Point;
     var BoundingSquare = (function () {
         function BoundingSquare(top, left, width, height) {
             this.top = top;
@@ -8,10 +20,7 @@ define("diagramView", ["require", "exports"], function (require, exports) {
             this.height = height;
         }
         BoundingSquare.prototype.getCenterPoint = function () {
-            return {
-                x: this.left + Math.floor(this.width / 2),
-                y: this.top + Math.floor(this.height / 2)
-            };
+            return new Point(this.left + Math.floor(this.width / 2), this.top + Math.floor(this.height / 2));
         };
         return BoundingSquare;
     }());
@@ -199,10 +208,10 @@ define("blocks", ["require", "exports", "diagramView"], function (require, expor
         };
         ConditionBlock.prototype.getPossibleConnectionPoints = function () {
             return [
-                { x: this.left + this.diagonalX / 2 + this.dragOffsetX, y: this.top + this.dragOffsetY },
-                { x: this.left + this.diagonalX / 2 + this.dragOffsetX, y: this.top + this.diagonalY + this.dragOffsetY },
-                { x: this.left + this.dragOffsetX, y: this.top + this.diagonalY / 2 + this.dragOffsetY },
-                { x: this.left + this.diagonalX + this.dragOffsetX, y: this.top + this.diagonalY / 2 + this.dragOffsetY }
+                new diagramView_1.Point(this.left + this.diagonalX / 2 + this.dragOffsetX, this.top + this.dragOffsetY),
+                new diagramView_1.Point(this.left + this.diagonalX / 2 + this.dragOffsetX, this.top + this.diagonalY + this.dragOffsetY),
+                new diagramView_1.Point(this.left + this.dragOffsetX, this.top + this.diagonalY / 2 + this.dragOffsetY),
+                new diagramView_1.Point(this.left + this.diagonalX + this.dragOffsetX, this.top + this.diagonalY / 2 + this.dragOffsetY)
             ];
         };
         ConditionBlock.prototype.setDragOffset = function (x, y) {
@@ -235,8 +244,7 @@ define("connections", ["require", "exports"], function (require, exports) {
                 var pointFrom = connectionPointsFrom_1[_i];
                 for (var _a = 0, connectionPointsTo_1 = connectionPointsTo; _a < connectionPointsTo_1.length; _a++) {
                     var pointTo = connectionPointsTo_1[_a];
-                    var distance = Math.sqrt(Math.abs(pointFrom.x - pointTo.x) +
-                        Math.abs(pointFrom.y - pointTo.y));
+                    var distance = pointFrom.distanceTo(pointTo);
                     if (distance < smallestDistance) {
                         bestPointFrom = pointFrom;
                         bestPointTo = pointTo;
