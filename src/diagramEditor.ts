@@ -3,7 +3,6 @@ import { EntryBlock, ConditionBlock } from 'blocks'
 import { NormalConnection } from 'connections'
 
 export class DiagramEditor {
-    private canvas: HTMLCanvasElement;
     private diagramView: DiagramView;
 
     constructor(width: number, height: number) {
